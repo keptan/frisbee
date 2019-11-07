@@ -138,7 +138,7 @@ int main (int argc, char** argv)
 	}
 
 	Database db(dbName);
-	std::cout << dbName << ' ' << init << std::endl;
+	if(init) readLegacyFiles(db);
 	buildDatabases(db);
 	scanDir(db, scanLocation);
 }
