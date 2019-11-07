@@ -72,11 +72,15 @@ void scanDir (Database& db, const std::string& location)
 
 void twitter (Database& db)
 {
+
 	const auto cutest = db.SELECT<std::string, std::string,  double> ("path, hash, (mu - sigma * 3) as score FROM "
 								  "path_meta_data JOIN idScore USING (hash) "
-								  "ORDER BY score DESC LIMIT 10");
+								  "WHERE hash NOT IN (SELECT hash FROM used) "
+								  "ORDER BY score DESC LIMIT 500");
+
 
 	const auto random = select_randomly(cutest.begin(), cutest.end());
+	if(random == cutest.end()) return;
 	const auto [path, hash, score] = *random; 
 
 	std::string qHash = '"' + hash;
@@ -87,6 +91,8 @@ void twitter (Database& db)
 	const auto cutestTags = db.SELECT<std::string, double>("tag, (mu - sigma * 3) * min(10, COUNT(*)) "
 														  "as power FROM tagScore JOIN image_tag_bridge USING (tag) GROUP BY tag");
 	auto tags		  = db.SELECT<std::string>("tag FROM image_tag_bridge WHERE hash = " + qHash);
+
+
 
 	std::sort(tags.begin(), tags.end(), 
 	[&](const auto a, const auto b)
@@ -126,8 +132,8 @@ void twitter (Database& db)
 		if(i++ > 3) break;
 	}
 
-
-
+//	auto u = db.INSERT("OR IGNORE INTO used (hash) VALUES (?)");
+//	u.push(hash);
 }
 
 
@@ -202,9 +208,12 @@ int main (int argc, char** argv)
 	}
 
 	Database db(dbName);
-
 	buildDatabases(db);
+
 	if(init) readLegacyFiles(db);
+	auto t = db.transaction();
 	if(scan) scanDir(db, scanLocation);
+	t.commit();
 	if(scan) twitter(db);
+
 }
