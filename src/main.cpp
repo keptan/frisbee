@@ -134,7 +134,7 @@ void twitter (Database& db)
 		if(tag == "no_danbooru") continue;
 		if(tag == "danbooru") continue;
 
-		std::cout << '#' << tag << std::endl;
+		std::cout << tag << std::endl;
 		if(i++ > 3) break;
 	}
 
