@@ -147,6 +147,7 @@ int main (int argc, char** argv)
 	std::string dbName;
 	std::string scanLocation;
 	bool init  = false;
+	bool scan;
 	bool dFlag = false;
 	bool sFlag = false;
 
@@ -170,6 +171,7 @@ int main (int argc, char** argv)
 		{
 			dFlag = false; 
 			sFlag = true;
+			scan = true;
 			continue;
 		}
 
@@ -193,15 +195,16 @@ int main (int argc, char** argv)
 		dbName = ":memory:";
 	}
 
-	if(!scanLocation.size())
+	if(!scanLocation.size() && scan)
 	{
 		std::cerr << "no scan location provided, aborting!" << std::endl;
 		return 1; 
 	}
 
 	Database db(dbName);
-	if(init) readLegacyFiles(db);
+
 	buildDatabases(db);
-	scanDir(db, scanLocation);
-	twitter(db);
+	if(init) readLegacyFiles(db);
+	if(scan) scanDir(db, scanLocation);
+	if(scan) twitter(db);
 }
