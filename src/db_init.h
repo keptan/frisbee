@@ -50,7 +50,7 @@ void buildDatabases (Database& db)
 			  "write_time REAL NOT_NULL, "
 			  "hash STRING NOT_NULL REFERENCES images)");
 
-	db.CREATE("TABLE IF NOT EXISTS used (hash STRING NOT_NULL REFERENCES images)");
+	db.CREATE("TABLE IF NOT EXISTS used (hash STRING NOT_NULL PRIMARY_KEY UNIQUE REFERENCES images)");
 
 	//only commit if we can make all the tables..
 	t.commit();
