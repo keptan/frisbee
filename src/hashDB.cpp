@@ -27,7 +27,6 @@ void HashDB :: readInto (const std::filesystem::path p, const PathMetaData d)
 
 void HashDB :: scanDirectory (std::filesystem::path p)
 {
-	std::scoped_lock lk (entryMutex, fileMutex);
 
 	for(const auto& f : std::filesystem::directory_iterator(p))
 	{
@@ -75,7 +74,6 @@ void HashDB :: scanDirectory (std::filesystem::path p)
 
 void HashDB :: scanDirectoryRecursive (std::filesystem::path p)
 {
-	std::scoped_lock lk (entryMutex, fileMutex);
 
 	for(const auto& f : std::filesystem::recursive_directory_iterator(p, std::filesystem::directory_options::follow_directory_symlink))
 	{
@@ -123,7 +121,6 @@ void HashDB :: scanDirectoryRecursive (std::filesystem::path p)
 
 bool HashDB :: contains (const std::filesystem::path p) const
 {
-	std::shared_lock lk (entryMutex);
 	const auto absolute = std::filesystem::absolute(p);
 
 	return localPathMap.find(absolute) != localPathMap.end();
@@ -131,7 +128,6 @@ bool HashDB :: contains (const std::filesystem::path p) const
 
 PathMetaData HashDB :: retrieveData (const std::filesystem::path p) const
 {
-	std::shared_lock lk (entryMutex);
 	const auto absolute = std::filesystem::absolute(p);
 
 	assert (localPathMap.find(absolute) != localPathMap.end());
@@ -140,14 +136,12 @@ PathMetaData HashDB :: retrieveData (const std::filesystem::path p) const
 
 std::map<std::filesystem::path, PathMetaData>::const_iterator HashDB :: begin (void) const
 {
-	std::shared_lock lk (entryMutex);
 	return localPathMap.begin();
 }
 
 
 std::map<std::filesystem::path, PathMetaData>::const_iterator HashDB :: end   (void) const
 {
-	std::shared_lock lk (entryMutex);
 	return localPathMap.end();
 }
 

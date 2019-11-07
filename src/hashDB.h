@@ -8,8 +8,6 @@
 #include <string>
 #include "image.h"
 #include "filetypes.h"
-#include <mutex>
-#include <shared_mutex>
 
 
 namespace cute {
@@ -23,9 +21,6 @@ class HashDB
 
 	std::map<std::filesystem::path, PathMetaData> pathMap;
 	std::map<std::filesystem::path, PathMetaData> localPathMap;
-
-	mutable std::shared_mutex entryMutex;
-	mutable std::mutex		  fileMutex;
 
 
 public:
