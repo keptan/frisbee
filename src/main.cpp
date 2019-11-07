@@ -2,8 +2,10 @@
 #include "image.h"
 #include "transactional.h"
 #include "db_init.h"
+#include "utility.h"
 
 #include <cstdlib>
+#include <algorithm>
 
 void cutestArtists (Database& db)
 {
@@ -66,6 +68,66 @@ void scanDir (Database& db, const std::string& location)
 	{
 		transaction.push(path.string(), (double) data.file_size, (double) data.write_time, data.hash);
 	}
+}
+
+void twitter (Database& db)
+{
+	const auto cutest = db.SELECT<std::string, std::string,  double> ("path, hash, (mu - sigma * 3) as score FROM "
+								  "path_meta_data JOIN idScore USING (hash) "
+								  "ORDER BY score DESC LIMIT 10");
+
+	const auto random = select_randomly(cutest.begin(), cutest.end());
+	const auto [path, hash, score] = *random; 
+
+	std::string qHash = '"' + hash;
+	qHash = qHash + '"';
+
+	const auto characters = db.SELECT<std::string>("character FROM image_character_bridge WHERE hash = "+ qHash);
+	const auto artists	  = db.SELECT<std::string>("artist FROM image_artist_bridge WHERE hash = " + qHash);
+	const auto cutestTags = db.SELECT<std::string, double>("tag, (mu - sigma * 3) * min(10, COUNT(*)) "
+														  "as power FROM tagScore JOIN image_tag_bridge USING (tag) GROUP BY tag");
+	auto tags		  = db.SELECT<std::string>("tag FROM image_tag_bridge WHERE hash = " + qHash);
+
+	std::sort(tags.begin(), tags.end(), 
+	[&](const auto a, const auto b)
+	{
+		const auto [aTag] = a; 
+		const auto [bTag] = b;
+		double aPower = 0;
+		double bPower = 0;
+
+		for(const auto& [tag, power] : cutestTags)
+		{
+			if(tag == aTag) aPower = power;
+			if(tag == bTag) bPower = power;
+		}
+
+		return aPower > bPower;
+	});
+
+	std::cout << '"' << path << '"' << std::endl;
+	std::cout << "cutescore: " << score << std::endl;
+	if(artists.size())
+	{
+		std::cout << "artist: ";
+		for(const auto& [a] : artists) std::cout << a << ' ';
+	}
+	int i = 0;
+	std::cout << std::endl;
+	std::cout << std::endl;
+	for(const auto& [tag] : tags) 
+	{
+		if(tag == "no_sauce") continue;
+		if(tag == "no_gelbooru") continue;
+		if(tag == "no_danbooru") continue;
+		if(tag == "danbooru") continue;
+
+		std::cout << '#' << tag << std::endl;
+		if(i++ > 3) break;
+	}
+
+
+
 }
 
 
@@ -141,4 +203,5 @@ int main (int argc, char** argv)
 	if(init) readLegacyFiles(db);
 	buildDatabases(db);
 	scanDir(db, scanLocation);
+	twitter(db);
 }
