@@ -1,5 +1,6 @@
 #include "hashDB.h" 
 #include "fileMd5.h"
+#include "image.h"
 #include <iomanip>
 #include <cassert>
 #include <iostream>
@@ -11,53 +12,18 @@
 namespace cute {
 
 
-HashDB :: HashDB (std::filesystem::path p)
-		:dbFile(p)
+HashDB :: HashDB ()
 {
-		readCSV();
 }
 
 HashDB :: ~HashDB (void)
 {
 }
-void HashDB :: readCSV (void)
+void HashDB :: readInto (const std::filesystem::path p, const PathMetaData d)
 {
-	std::scoped_lock lk (entryMutex, fileMutex);
-
-	std::fstream fs;
-	fs.open(dbFile);
-	fs.seekg(0, std::ios::beg);
-
-	std::string line;
-
-	while(std::getline(fs, line))
-	{
-		std::istringstream is(line);
-
-		unsigned long t, s;
-		std::string p, h;
-
-		is >> std::quoted(p) >> s >> t >> h;
-		pathMap.insert( std::make_pair( p, PathMetaData(s, t, h)));
-	}
-
-	fs.close();
-
+	pathMap.insert( std::make_pair( p, d));
 }
 
-void HashDB :: writeCSV (void)
-{
-	std::ofstream fs;
-	fs.open(dbFile);
-
-	for(const auto& pair : pathMap)
-	{
-		fs << pair.first << '	' << pair.second.file_size << '	' << pair.second.write_time << '	' << pair.second.hash << '\n';
-	}
-		
-
-	fs.close();
-}
 
 void HashDB :: scanDirectory (std::filesystem::path p)
 {
@@ -105,7 +71,6 @@ void HashDB :: scanDirectory (std::filesystem::path p)
 		localPathMap.insert_or_assign(absolute, PathMetaData(size, time, hash));
 	}
 
-	writeCSV();
 }
 
 void HashDB :: scanDirectoryRecursive (std::filesystem::path p)
@@ -154,7 +119,6 @@ void HashDB :: scanDirectoryRecursive (std::filesystem::path p)
 	}
 
 
-	writeCSV();
 }
 
 bool HashDB :: contains (const std::filesystem::path p) const

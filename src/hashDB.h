@@ -21,23 +21,21 @@ class HashDB
 
 	using Hash = PathMetaData::Hash;
 
-	std::filesystem::path dbFile;
 	std::map<std::filesystem::path, PathMetaData> pathMap;
 	std::map<std::filesystem::path, PathMetaData> localPathMap;
 
 	mutable std::shared_mutex entryMutex;
 	mutable std::mutex		  fileMutex;
 
-	void writeCSV (void);
 
 public:
-	HashDB (std::filesystem::path );
+	HashDB ();
 	~HashDB (void);
 
-	void readCSV (void);
-	
 	void scanDirectory (std::filesystem::path p);
 	void scanDirectoryRecursive (std::filesystem::path p);
+
+	void readInto (const std::filesystem::path p, const PathMetaData d);
 
 	bool contains (const std::filesystem::path p) const;
 	PathMetaData retrieveData (const std::filesystem::path p) const;
