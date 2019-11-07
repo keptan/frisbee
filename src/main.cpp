@@ -118,6 +118,12 @@ void twitter (Database& db)
 		std::cout << "artist: ";
 		for(const auto& [a] : artists) std::cout << a << ' ';
 	}
+	if(characters.size()) std::cout << std::endl;
+	if(characters.size())
+	{
+		std::cout << "character: ";
+		for(const auto& [c] : characters) std::cout << '#' << c << ' ';
+	}
 	int i = 0;
 	std::cout << std::endl;
 	std::cout << std::endl;
