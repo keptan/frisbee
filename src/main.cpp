@@ -122,7 +122,7 @@ void twitter (Database& db)
 	if(characters.size())
 	{
 		std::cout << "character: ";
-		for(const auto& [c] : characters) std::cout << '#' << c << ' ';
+		for(const auto& [c] : characters) std::cout << c << ' ';
 	}
 	int i = 0;
 	std::cout << std::endl;
