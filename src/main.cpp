@@ -73,10 +73,13 @@ void scanDir (Database& db, const std::string& location)
 void twitter (Database& db)
 {
 
-	const auto cutest = db.SELECT<std::string, std::string,  double> ("path, hash, (mu - sigma * 3) as score FROM "
+	const auto cutest = db.SELECT<std::string, std::string,  double> 
+								  (
+								  "path, hash, (mu - sigma * 3) as score FROM "
 								  "path_meta_data JOIN idScore USING (hash) "
 								  "WHERE hash NOT IN (SELECT hash FROM used) "
-								  "ORDER BY score DESC LIMIT 500");
+								  "ORDER BY score DESC LIMIT 500 - (SELECT count(*) FROM used)"
+								  );
 
 
 	const auto random = select_randomly(cutest.begin(), cutest.end());
