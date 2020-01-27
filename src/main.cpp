@@ -141,8 +141,8 @@ void twitter (Database& db)
 		if(i++ > 3) break;
 	}
 
-//	auto u = db.INSERT("OR IGNORE INTO used (hash) VALUES (?)");
-//	u.push(hash);
+	auto u = db.INSERT("OR IGNORE INTO used (hash) VALUES (?)");
+	u.push(hash);
 }
 
 
@@ -162,7 +162,7 @@ int main (int argc, char** argv)
 	std::string dbName;
 	std::string scanLocation;
 	bool init  = false;
-	bool scan;
+	bool scan  = false;
 	bool dFlag = false;
 	bool sFlag = false;
 
